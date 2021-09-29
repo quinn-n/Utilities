@@ -4,12 +4,11 @@ rename-jpg-large.py
 Renames .jpg_large files to .jpg files
 written by Quinn Neufeld
 Nov. 10th 2019
+Sept. 29 2021 - Removed progutil dependency
 """
 
 import os
 from sys import argv
-
-import progutil
 
 HELP_MSG = """Usage: rename-jpg-large.py <file(s)/dir(s)>
 Recursively renames files / dirs from .jpg_large files to .jpg files."""
@@ -27,7 +26,7 @@ def rename_path(path: str):
     os.rename(path, path.replace(".jpg_large", ".jpg"))
 
 #Verify inputs
-if not progutil.check_inputs(argv, 2, HELP_MSG):
+if len(argv) < 2 or "-h" in argv or "--help" in argv:
     exit(1)
 
 #Rename each path given to us

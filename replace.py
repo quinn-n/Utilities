@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 """Replaces text in files. Now recursively.
 Usage: replace.py <file> <to replace> <to replace with> <[times to replace]>
-Written by Quinn Neufeld."""
+Written by Quinn Neufeld.
+Sept. 29 2021 - Removed progutil dependency"""
 
 from sys import argv
 import os
-import progutil
 
 HELP_MSG = "Usage: replace.py <file/dir> <to replace> <to replace with> <[times to replace]>"
 
 def main():
     """main function"""
     #check inputs.
-    if not progutil.check_inputs(argv, 4, HELP_MSG):
-        exit()
+    if len(argv) < 4 or "-h" in argv or "--help" in argv:
+        print(HELP_MSG)
+        exit(1)
 
     path = argv[1]
     to_rep = argv[2]

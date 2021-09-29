@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
-#Removes the extra chars on a file created by youtube-dl.
-#Ex. test-ioedjfack.webm -> test.webm
-#Written / Maintained by Quinn Neufeld
-#June 25th 2019
+# Removes the extra chars on a file created by youtube-dl.
+# Ex. test-ioedjfack.webm -> test.webm
+# Written / Maintained by Quinn Neufeld
+# June 25th 2019
+# Sept. 29 2021 - Removed progutil dependency
 
 from sys import argv
 import os
-import progutil
 
 HELP_MSG = "Usage: remove-youtubedl-chars <file(s)>"
 
@@ -74,7 +74,8 @@ def rename_path(path: str):
     else:
         rename_file(path)
 
-if not progutil.check_inputs(argv, 2, HELP_MSG):
+if len(argv) < 2 or "-h" in argv or "--help" in argv:
+    print(HELP_MSG)
     exit(1)
 
 for fi in argv[1:]:

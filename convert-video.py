@@ -6,13 +6,12 @@ Converts video files to audio files
 Written by Quinn Neufeld
 June 24th 2019
 March 25th 2021 Replaced string concats with os.path.join where applicable
+Sept. 29 2021 - Removed progutil dependency
 """
 
 import os
 from sys import argv
 import multiprocessing as mp
-
-import progutil
 
 HELP_MSG = """Usage: convert-video.py <indir> [-o outdir]
 Converts video files in a directory and puts them into an output dir.
@@ -22,18 +21,20 @@ Requires ffmpeg."""
 DEFAULT_OUTDIR = "out/"
 
 #Verify inputs
-if not progutil.check_inputs(argv, 2, HELP_MSG):
+if len(argv) < 2 or "-h" in argv or "--help" in argv:
+    print(HELP_MSG)
     exit(1)
-
-args = progutil.parse_inputs(argv, guaranteed=["o"], default=None)
 
 indir = argv[1]
 
 #Set output dir to either the default or the one given by the command line
-if args["o"] == None:
-    outdir = DEFAULT_OUTDIR
-else:
-    outdir = args["o"]
+outdir = DEFAULT_OUTDIR
+i = 1
+while i < len(argv):
+    if "-o" in argv[i]:
+        outdir = argv[i + 1]
+        i += 1
+    i += 1
 
 def ensure_exists(path: str):
     """If a directory does not exist, creates it"""

@@ -3,17 +3,18 @@
 # requires pyautogui.
 # Written by Quinn Neufeld
 # Feb. 15th 2019
+# Sept. 29 2021 - Removed progutil dependency
 from sys import argv
 from time import sleep
-from progutil import check_inputs
 import pyautogui
 HELP_MSG = """Usage: repeatkeys <string> <times> <[delay]>
 Types out string a given number of times after delay. (If no delay is given, defaults to 1 second.)"""
 
 def main():
     """Program's main function."""
-    if not check_inputs(argv, 3, HELP_MSG):
-        exit()
+    if len(argv) < 3 or "-h" in argv or "--help" in argv:
+        print(HELP_MSG)
+        exit(1)
     string = argv[1]
     times = int(argv[2])
     #Check if we're given a delay or not. If not, select default (1 sec)

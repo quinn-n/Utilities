@@ -5,11 +5,11 @@ Recursively searches file contents for a given string.
 Outputs the files that contain the string.
 Written by Quinn Neufeld. <Quinn Neufeld@gmail.com>
 March 23rd 2019
+Sept. 29 2021 - Removed progutil dependency
 """
 from time import sleep
 import os
 from sys import argv
-import progutil
 
 HELP_MSG = "Usage: search.py <path> <string> [-v]\nSearches a file / directory for a given string.\n-v = verbose mode"
 VERBOSE = False
@@ -50,14 +50,15 @@ def search_path(path, search):
 
 def main():
     """Program's main function."""
-    if not progutil.check_inputs(argv, 3, HELP_MSG):
+    if len(argv) < 3 or "-h" in argv or "--help" in argv:
+        print(HELP_MSG)
         return False
     #Set verbose
-    args = progutil.parse_inputs(argv, guaranteed=["v"])
     global VERBOSE
-    VERBOSE = args["v"]
-    del args
+    if "-v" in argv or "--verbose" in argv:
+        VERBOSE = True
     #Search path.
     search_path(argv[1], argv[2])
 
-main()
+if __name__ == "__main__":
+    main()
