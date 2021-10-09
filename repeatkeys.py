@@ -12,10 +12,8 @@ from time import sleep
 import click
 import pyautogui
 
-HELP_MSG = """Usage: repeatkeys <string> <times> <[delay]>
-Types out string a given number of times after delay. (If no delay is given, defaults to 1 second.)"""
 
-
+@click.command()
 @click.argument("string", required=True, type=str)
 @click.argument("times", required=True, type=int)
 @click.argument("delay", type=int, default=1)
