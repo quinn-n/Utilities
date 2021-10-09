@@ -75,19 +75,20 @@ def search_path(path: str, search: list[str], fuzzy: bool, regex: bool) -> None:
 
 
 @click.command()
-@click.argument("filename", required=True, type=str)
+@click.argument("path", required=True, type=str)
 @click.option("-v", "--verbose", count=True, type=int, default=0, help="verbose mode. More v = more verbose")
 @click.option("-f", "--fuzzy", is_flag=True, type=bool, default=False, help="fuzzy search, passes check if one string matches instead of all strings")
 @click.option("-r", "--re", "--regex", is_flag=True, default=False, type=bool, help="regex mode, matches regular expressions rather than string literals")
 @click.argument("search_terms", required=True, type=str, nargs=-1)
 def search(*args, **kwargs: [bool, int]) -> None:
-    """Program's main function."""
+    """Searches path for strings or regular expressions
+    """
     # Set verbose
     global VERBOSE
     VERBOSE = kwargs["verbose"]
     verbose_print(f"Got verbose level: {VERBOSE}", 1)
     # Search path.
-    search_path(kwargs["filename"], kwargs["search_terms"],
+    search_path(kwargs["path"], kwargs["search_terms"],
                 kwargs["fuzzy"], kwargs["re"])
 
 
