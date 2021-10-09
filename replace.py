@@ -2,7 +2,9 @@
 """Replaces text in files. Now recursively.
 Usage: replace.py <file> <to replace> <to replace with> <[times to replace]>
 Written by Quinn Neufeld.
-Sept. 29 2021 - Removed progutil dependency"""
+Sept. 29 2021 - Removed progutil dependency
+Oct. 8 2021 - Rewrote to use click
+"""
 
 from sys import argv
 import os
