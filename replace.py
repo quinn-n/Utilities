@@ -7,44 +7,57 @@ Sept. 29 2021 - Removed progutil dependency"""
 from sys import argv
 import os
 
-HELP_MSG = "Usage: replace.py <file/dir> <to replace> <to replace with> <[times to replace]>"
+import click
 
-def main():
-    """main function"""
-    #check inputs.
-    if len(argv) < 4 or "-h" in argv or "--help" in argv:
-        print(HELP_MSG)
-        exit(1)
 
-    path = argv[1]
-    to_rep = argv[2]
-    to_rep_with = argv[3]
-    times = 0
-    if len(argv) > 4:
-        times = int(argv[4])
-
+@click.command()
+@click.argument("path", required=True, type=click.Path(exists=True))
+@click.argument("to_replace", required=True, type=str)
+@click.argument("to_replace_with", required=True, type=str)
+@click.argument("times", default=0, type=int)
+def replace(*args, **kwargs):
+    """Replaces instances of to_replace with to_replace_with in path
+    """
+    path = kwargs["path"]
+    to_replace = kwargs["to_replace"]
+    to_replace_with = kwargs["to_replace_with"]
+    times = kwargs["times"]
     if os.path.isfile(path):
-        replace_file(path, to_rep, to_rep_with, times=times)
+        replace_file(path, to_replace, to_replace_with, times=times)
     else:
-        replace_dir(path, to_rep, to_rep_with, times=times)
+        replace_dir(path, to_replace, to_replace_with, times=times)
 
-def replace_dir(path, to_rep, to_rep_with, times=0):
-    """Recursively replaces every instance of to_rep with to_rep_with in path."""
+def replace_dir(path: str, to_rep: str, to_rep_with: str, times: int = 0):
+    """Recursively replaces every instance of to_rep with to_rep_with in path
+
+    Args:
+        path (str): Directory to replace strings in
+        to_rep (str): String literal to be replaced
+        to_rep_with (str): String literal to replace to_rep with
+        times (int, optional): Maximum nuber of times to replace in each file. Defaults to 0.
+    """
     for fipath in os.listdir(path):
-        fullpath = path + "/" + fipath
+        fullpath = os.path.join(path, fipath)
         if os.path.isfile(fullpath):
             replace_file(fullpath, to_rep, to_rep_with, times=times)
         else:
             replace_dir(fullpath, to_rep, to_rep_with, times=times)
 
 
-def replace_file(path, to_rep, to_rep_with, times=0):
-    """Replaces to_rep with to_rep_with in the file at path."""
+def replace_file(path: str, to_rep: str, to_rep_with: str, times: int = 0):
+    """Replaces to_rep with to_rep_with in the file at path
+
+    Args:
+        path (str): File path to replace strings in
+        to_rep (str): String literal to be replaced
+        to_rep_with (str): String literal to do the replacing
+        times (int, optional): Maximum number of times to replace. Defaults to 0.
+    """
     fi = open(path, "r")
     try:
         lines = fi.readlines()
     except:
-        print("Had an error while opening file " + path)
+        click.echo(f"Had an error while opening file: {path}")
         fi.close()
         return
     fi.close()
@@ -59,4 +72,5 @@ def replace_file(path, to_rep, to_rep_with, times=0):
     outfi.writelines(new_lines)
     outfi.close()
 
-main()
+if __name__ == "__main__":
+    replace()
