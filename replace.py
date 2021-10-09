@@ -27,6 +27,7 @@ def replace(*args, **kwargs):
     else:
         replace_dir(path, to_replace, to_replace_with, times=times)
 
+
 def replace_dir(path: str, to_rep: str, to_rep_with: str, times: int = 0):
     """Recursively replaces every instance of to_rep with to_rep_with in path
 
@@ -71,6 +72,7 @@ def replace_file(path: str, to_rep: str, to_rep_with: str, times: int = 0):
     outfi = open(path, "w")
     outfi.writelines(new_lines)
     outfi.close()
+
 
 if __name__ == "__main__":
     replace()
