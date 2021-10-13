@@ -1,34 +1,55 @@
 #!/usr/bin/env python3
-import sys
+# Copies a file / directory from src to dest.
+# Prints the completion status
+# Written by Quinn Neufeld
+# Oct. 11 2021 - Rewrote to support recursion and moved CLI to click
+
 import os
 import multiprocessing as mp
 from time import sleep
-SLEEP_TIME = .1
+from shutil import copyfile
 
-def copy(source, destination):
-    os.system("cp "+source+" "+destination)
+import click
 
-if len(sys.argv) < 3:
-    print("Usage: "+sys.argv[0]+" <source> <destination>")
-    print("Copies files from one location to the other. Prints the status as a percent.")
-    sys.exit()
 
-source = sys.argv[1]
-destination = sys.argv[2]
+def copy(src: tuple[str], dest: str) -> None:
+    """Copies a path from src to dest.
 
-copyProcess = mp.Process(target=copy,args=(source,destination,))
-copyProcess.start()
+    Args:
+        src (list[str]): Source path
+        dest (str): Dest path
+    """
+    for s in src:
+        if os.path.isdir(s):
+            if not os.path.exists(os.path.join(s)):
+                os.mkdir(os.path.join(dest, s))
+            for f in os.listdir(s):
+                copy((os.path.join(s, f),), os.path.join(dest, s, f))
+        else:
+            if os.path.isdir(dest):
+                copyfile(s, os.path.join(dest, s))
+            else:
+                copyfile(s, dest)
 
-sourceSize = os.path.getsize(source)
-while not os.path.exists(destination):
-    sleep(.01)
-destinationSize = os.path.getsize(destination)
+@click.command()
+@click.argument("src", type=str, required=True, nargs=-1)
+@click.argument("dest", type=str, required=True)
+def copy_status(src: list[str], dest: str) -> None:
+    """Copies files from src to dest. Prints the status as a percent.
+    """
+    copy_process = mp.Process(target=copy, args=(src, dest,))
+    copy_process.start()
 
-while sourceSize != destinationSize:
-    sourceSize = os.path.getsize(source)
-    destinationSize = os.path.getsize(destination)
-    #overwrite old percent prints with spaces so we don't end up with a '100% complete.3% complete.'
-    print("                                                                          ",end="\r",flush=True)
-    print(str((destinationSize / sourceSize) * 100) + "% complete.", end="\r", flush=True)
-    sleep(SLEEP_TIME)
-print("\ndone copying files")
+    src_size = sum(os.path.getsize(s) for s in src)
+    while not os.path.exists(dest):
+        sleep(.0001)
+    while copy_process.is_alive():
+        dest_size = os.path.getsize(dest)
+        click.echo(f"{round(dest_size / src_size * 100, 2)}% complete\r", nl=False)
+        sleep(.02)
+    
+    copy_process.join()
+    click.echo("100% complete")
+
+if __name__ == "__main__":
+    copy_status(None, None)

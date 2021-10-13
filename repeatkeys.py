@@ -6,7 +6,6 @@
 # Sept. 29 2021 - Removed progutil dependency
 # Oct. 8 2021 - Rewrote to use click
 
-from sys import argv
 from time import sleep
 
 import click

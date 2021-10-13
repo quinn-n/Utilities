@@ -7,64 +7,84 @@ Written by Quinn Neufeld
 June 24th 2019
 March 25th 2021 Replaced string concats with os.path.join where applicable
 Sept. 29 2021 - Removed progutil dependency
+Oct. 11 2021 - Moved CLI to click
 """
 
 import os
-from sys import argv
 import multiprocessing as mp
 
-HELP_MSG = """Usage: convert-video.py <indir> [-o outdir]
-Converts video files in a directory and puts them into an output dir.
--o <outdir> - Specify what directory to write output files to. Defaults to out/
-Requires ffmpeg."""
+import click
 
-DEFAULT_OUTDIR = "out/"
 
-#Verify inputs
-if len(argv) < 2 or "-h" in argv or "--help" in argv:
-    print(HELP_MSG)
-    exit(1)
+def ensure_exists(path: str) -> None:
+    """Ensures a direcotry / file exists.
+    If nothing exists at path, creates a directory
 
-indir = argv[1]
-
-#Set output dir to either the default or the one given by the command line
-outdir = DEFAULT_OUTDIR
-i = 1
-while i < len(argv):
-    if "-o" in argv[i]:
-        outdir = argv[i + 1]
-        i += 1
-    i += 1
-
-def ensure_exists(path: str):
-    """If a directory does not exist, creates it"""
+    Args:
+        path (str): Path to ensure exists
+    """
     if not os.path.exists(path):
         os.mkdir(path)
 
-def remove_ending(path: str):
-    """Removes the file ending"""
+def remove_ending(path: str) -> str:
+    """Removes file ending
+
+    Args:
+        path (str): Path to remove ending from
+
+    Returns:
+        str: New path without ending
+    """
     last_loc = path.rfind(".")
     return path[:last_loc]
 
-def convert_file(name: str):
-    """Converts a file in the input dir to a file in the output dir"""
-    inpath = os.path.join(indir, name)
-    no_end = remove_ending(name)
-    outpath = os.path.join(outdir, no_end + ".mp3")
-    print("Converting file " + inpath + " to " + outpath)
-    os.system("ffmpeg -i " + escape_string(inpath) + " " + escape_string(outpath))
+def convert_file(srcfi: str, destfi: str) -> None:
+    """Runs srcfi through ffmpeg and writes the result to destfi
 
-def escape_string(s: str):
-    """Inserts escape characters in s"""
+    Args:
+        srcfi (str): Video file to convert
+        destfi (str): Audio file to write to
+    """
+    click.echo(f"Converting {srcfi} to {destfi}")
+    os.system(f"ffmpeg -i {escape_string(srcfi)} {escape_string(destfi)}")
+
+def escape_string(s: str) -> str:
+    """Escapes out every character in s
+
+    Args:
+        s (str): String to escape
+
+    Returns:
+        str: Escaped string
+    """
     outstr = ""
     for c in s:
         outstr += "\\" + c
     return outstr
 
-files = os.listdir(indir)
+def convert_dir(srcdir: str, outdir: str) -> None:
+    """Converts video files in a directory to audio files
 
-#Make sure the output directory exists
-ensure_exists(outdir)
+    Args:
+        srcdir (str): source directory
+        outdir (str): destination directory
+    """
+    ensure_exists(srcdir)
+    ensure_exists(outdir)
+    for file in os.listdir(srcdir):
+        convert_file(os.path.join(srcdir, file), os.path.join(outdir, remove_ending(file) + ".mp3"))
 
-for name in files:
-    convert_file(name)
+
+@click.command()
+@click.argument("srcdir", required=True, type=str)
+@click.option("-o", "--outdir", required=False, type=str, default="out/", help="Specify what directory to output files to. Defaults to out/")
+def convert_videos(src: str, outdir: str) -> None:
+    """Converts video(s) at src to audio files and writes them to outdir
+    """
+    if os.path.isdir(src):
+        convert_dir(src, outdir)
+    else:
+        convert_file(src, os.path.join(outdir, remove_ending(src) + ".mp3"))
+
+if __name__ == "__main__":
+    convert_videos(None, None)

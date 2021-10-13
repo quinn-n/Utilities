@@ -5,11 +5,12 @@
 # Written / Maintained by Quinn Neufeld
 # June 25th 2019
 # Sept. 29 2021 - Removed progutil dependency
+# Oct. 11 2021 - Moved CLI over to click
 
-from sys import argv
 import os
 
-HELP_MSG = "Usage: remove-youtubedl-chars <file(s)>"
+import click
+
 
 def get_paths(path: str):
     """Returns the files and paths of everything in a dir"""
@@ -74,9 +75,13 @@ def rename_path(path: str):
     else:
         rename_file(path)
 
-if len(argv) < 2 or "-h" in argv or "--help" in argv:
-    print(HELP_MSG)
-    exit(1)
+@click.command()
+@click.argument("paths", required=True, type=str, nargs=-1)
+def rename_paths(paths: tuple[str]):
+    """Renames videos at given path locations
+    """
+    for path in paths:
+        rename_path(path)
 
-for fi in argv[1:]:
-    rename_path(fi)
+if __name__ == "__main__":
+    rename_paths(None)

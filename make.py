@@ -1,48 +1,48 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
-from sys import argv
+from shutil import copyfile
 
-ignored_files = ["make.py", "makefile", ".git", "README.txt"]
+import click
+
+
+ignored_files = ["make.py", "makefile", ".git", "README.txt", "requirements.txt"]
 #renamed_files = {"repeat.py":"repeat", "replace.py":"replace", "type.py":"type"}
 
-def last_idx(string, search):
-    """Returns the last index of search in string."""
-    for i in range(len(string) - 1, -1, -1):
-        if string[i] == search:
-            return i
-    return -1
+@click.group()
+def make() -> None:
+    pass
 
-def remove_extension(fi):
-    """Removes file extension"""
-    last_pos = last_idx(fi, ".")
-    return fi[:last_pos]
+@make.command()
+def localinstall() -> None:
+    """Installs scripts to $HOME/.local/bin/
+    """
+    homepath = os.environ["HOME"]
+    if not os.path.exists(os.path.join(homepath, ".local")):
+        os.mkdir(os.path.join(homepath, ".local"))
+    if not os.path.exists(os.path.join(homepath, ".local", "bin")):
+        os.mkdir(os.path.join(homepath, ".local", "bin"))
 
-def localinstall():
-    homepath = os.popen("echo ~").read()[0:-1]
-    if not os.path.exists(homepath + "/.local/"):
-        os.mkdir(homepath + "/.local/")
-    if not os.path.exists(homepath + "/.local/bin/"):
-        os.mkdir(homepath + "/.local/bin/")
-    workingdir = os.popen("pwd").read()[0:-1]
+    workingdir = os.environ["PWD"]
     files = os.listdir(".")
     for fi in files:
         if not fi in ignored_files:
-            print("linking " + fi + " to " + fi[:-3])
-            os.system("ln -sf " + workingdir + "/" + fi + " " + homepath + "/.local/bin/" + fi[:-3])
+            #Strip fi of file extension (.py)
+            stripped_fi = "".join(fi.split(".")[:-1])
+            print("linking " + fi + " to " + stripped_fi)
+            os.symlink(os.path.join(workingdir, fi), os.path.join(homepath, ".local", "bin", stripped_fi))
 
-def install():
-    """Installs scripts to /usr/bin/"""
+@make.command()
+def install() -> None:
+    """Installs scripts to /usr/bin/ (requires sudo)"""
     #Requires root
     files = os.listdir(".")
     #Go over each file. If it's in ignored_files, ignore it. Else, copy it to /usr/bin/
     for fi in files:
         if not fi in ignored_files:
             #Strip fi of file extension (.py)
-            new_fi = remove_extension(fi)
-            os.system("cp " + fi + " /usr/bin/" + new_fi)
+            stripped_fi = "".join(fi.split(".")[:-1])
+            copyfile(fi, os.path.join("/usr", "bin", stripped_fi))
 
 
-function = ""
-if len(argv) >= 2:
-    function = argv[1] + "()"
-exec(function)
+if __name__ == "__main__":
+    make()

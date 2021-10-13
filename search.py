@@ -9,9 +9,8 @@ Sept. 29 2021 - Removed progutil dependency
 Sept. 29 2021 - Added support for multiple search terms and fuzzy support
 Oct. 8 2021 - Added support for regular expressions and moved arguments and options to click
 """
-from time import sleep
+
 import os
-from sys import argv
 import re
 
 import click
@@ -80,16 +79,18 @@ def search_path(path: str, search: list[str], fuzzy: bool, regex: bool) -> None:
 @click.option("-f", "--fuzzy", is_flag=True, type=bool, default=False, help="fuzzy search, passes check if one string matches instead of all strings")
 @click.option("-r", "--re", "--regex", is_flag=True, default=False, type=bool, help="regex mode, matches regular expressions rather than string literals")
 @click.argument("search_terms", required=True, type=str, nargs=-1)
+# def search(path: str, verbose: int, fuzzy: bool, regex: bool, search_terms: list[str]):
 def search(*args, **kwargs: [bool, int]) -> None:
     """Searches path for strings or regular expressions
     """
     # Set verbose
     global VERBOSE
+    # VERBOSE = verbose
     VERBOSE = kwargs["verbose"]
-    verbose_print(f"Got verbose level: {VERBOSE}", 1)
     # Search path.
     search_path(kwargs["path"], kwargs["search_terms"],
                 kwargs["fuzzy"], kwargs["re"])
+    # search_path(path, search_terms, fuzzy, regex)
 
 
 if __name__ == "__main__":

@@ -1,30 +1,35 @@
 #!/usr/bin/env python3
+# Echos the rgb & greyscale values of the pixel currently under the mouse cursor
+# Written by Quinn Neufeld
+# Oct. 12 2021 - Rewrote greyscale function to actually be right & moved CLI over to click
 from time import sleep
-from sys import argv
+
+import click
 import pyautogui
 
-HELP_MSG = """Usage: get-pixel-value <delay>
-Sleeps for delay seconds and gets the colour values of the pixel your cursor is on."""
 
-def avg(nums):
-    """Returns the average for all the numbers in nums."""
-    total = sum(nums)
-    return total / len(nums)
+def greyscale(rgb: tuple[int]) -> int:
+    """Returns weighted greyscale value from rgb
 
-def main():
-    """Program's main function"""
-    if len(argv) < 2:
-        print(HELP_MSG)
-        exit(1)
-    elif argv[1] == "-h" or argv[1] == "--help":
-        print(HELP_MSG)
-        exit()
-    sleep_time = int(argv[1])
-    sleep(sleep_time)
+    Args:
+        rgb (tuple[int]): (r, g, b) - tuple of rgb values from 0 - 255
+
+    Returns:
+        int: greyscale value calculated from rgb tuple
+    """
+    return rgb[0] * .299 + rgb[1] * .587 + rgb[2] * .114
+
+@click.command()
+@click.argument("delay", required=False, default=0, type=int)
+def get_pixel_value(delay: int) -> None:
+    """Echos the rgb & greyscale values of the pixel currently under the mouse cursor
+    """
+    sleep(delay)
     x, y = pyautogui.position()
     im = pyautogui.screenshot(region=(x, y, 1, 1))
     pixels = im.load()
     colour_vals = pixels[0, 0]
-    print("Got " + str(colour_vals) + " at " + str((x, y)) + " with a greyscale of " + str(avg(colour_vals)))
+    click.echo(f"Got {colour_vals} at {(x, y)} with a greyscale of {greyscale(colour_vals)}")
 
-main()
+if __name__ == "__main__":
+    get_pixel_value(None)

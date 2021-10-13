@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
-import sys
-if len(sys.argv) < 3:
-    print("Usage: "+sys.argv[0]+" <string> <number>")
-    print("Repeat string number times")
-    sys.exit()
 
-for _ in range(int(sys.argv[2])):
-    print(sys.argv[1],end="")
+import click
+
+
+@click.command()
+@click.argument("text", type=str, required=True, nargs=-1)
+@click.argument("times", type=int, required=True)
+def repeat(text: list[str], times: int):
+    """Repeatedly echos text to the terminal
+    """
+    outstr = " ".join(text)
+    for _ in range(times):
+        click.echo(outstr)
+    
+if __name__ == "__main__":
+    repeat(None, None)
